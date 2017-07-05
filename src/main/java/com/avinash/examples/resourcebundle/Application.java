@@ -1,8 +1,7 @@
 package com.avinash.examples.resourcebundle;
 
-/**
- * Created by a0k00hu on 7/5/2017.
- */
+import java.io.File;
+import java.net.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -10,20 +9,32 @@ public class Application {
 
     public static void main(String[] args) {
 
-        // en_US
-        System.out.println("Current Locale: " + Locale.getDefault());
-        ResourceBundle mybundle = ResourceBundle.getBundle("MyLabels");
+        // prep for class loader
+        try {
+            URL locationURL = Application.class.getProtectionDomain().getCodeSource().getLocation();
+            String path = locationURL.getPath();
+            int index = path.lastIndexOf('/');
+            if (index > 0) {
+                path = path.substring(0,index);
+            }
+            File file = new File(path);
+            URL[] urls = new URL[]{file.toURI().toURL()};
+            ClassLoader loader = new URLClassLoader(urls);
+            // en_US
+            System.out.println("Current Locale: " + Locale.getDefault());
+            ResourceBundle mybundle = ResourceBundle.getBundle("MyLabels", Locale.getDefault(), loader);
 
-        // read MyLabels_en_US.properties
-        System.out.println("Say how are you in US English: " + mybundle.getString("how_are_you"));
+            // read MyLabels_en_US.properties
+            System.out.println("Say how are you in US English: " + mybundle.getString("how_are_you"));
 
-        Locale.setDefault(new Locale("ms", "MY"));
+            Locale.setDefault(new Locale("ms", "MY"));
 
-        // read MyLabels_ms_MY.properties
-        System.out.println("Current Locale: " + Locale.getDefault());
-        mybundle = ResourceBundle.getBundle("MyLabels");
-        System.out.println("Say how are you in Malaysian Malaya language: " + mybundle.getString("how_are_you"));
-
+            // read MyLabels_ms_MY.properties
+            System.out.println("Current Locale: " + Locale.getDefault());
+            mybundle = ResourceBundle.getBundle("MyLabels", Locale.getDefault(), loader);
+            System.out.println("Say how are you in Malaysian Malaya language: " + mybundle.getString("how_are_you"));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
-
 }
